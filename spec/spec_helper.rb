@@ -1,11 +1,7 @@
-require "active_support"
-require "active_support/core_ext/digest/uuid"
-require "byebug"
-require "faker"
+require "debug"
 require "rspec"
 require "rspec/matchers/fail_matchers"
 require "simplecov"
-require "uuid7"
 
 SimpleCov.start do
   add_filter "/spec/"
@@ -17,8 +13,7 @@ if ENV["CI"] == "true" || ENV["CODECOV_TOKEN"]
 end
 
 # load this gem
-gem_name = Dir.glob("*.gemspec")[0].split(".")[0]
-require gem_name
+require Dir.glob("*.gemspec")[0].split(".")[0]
 
 RSpec.configure do |config|
   # allow "fit" examples
