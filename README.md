@@ -1,23 +1,15 @@
-rspec-uuid
+rspec-debugging
 ======
-![Gem](https://img.shields.io/gem/dt/rspec-uuid?style=plastic)
-[![codecov](https://codecov.io/gh/dpep/rspec-uuid/branch/main/graph/badge.svg)](https://codecov.io/gh/dpep/rspec-uuid)
+![Gem](https://img.shields.io/gem/dt/rspec-debugging?style=plastic)
+[![codecov](https://codecov.io/gh/dpep/rspec-debugging/branch/main/graph/badge.svg)](https://codecov.io/gh/dpep/rspec-debugging)
 
 
-An RSpec matcher for UUIDs.
+Tools to make debugging RSpec easier.
 
 ```ruby
-require "rspec/uuid"
+require "rspec/debugging"
 
 
-it { is_expected.to be_a_uuid }
-
-# check the version
-it { is_expected.to be_a_uuid(version: 4) }
-it { is_expected.to be_a_uuid.of_version(4) }
-
-# compose with other matchers
-it { expect(data).to include(uuid: a_uuid) }
 ```
 
 
