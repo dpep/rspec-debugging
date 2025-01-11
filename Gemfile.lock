@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rspec-debugging (0.0.0)
+    rspec-debugging (0.0.1)
       rspec-expectations (>= 3)
 
 GEM
