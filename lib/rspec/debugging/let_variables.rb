@@ -1,8 +1,6 @@
 module RSpec
   module Debugging
     module LetVariables
-      SCOPES = [ :file, :global ]
-
       def let_variables
         let_variable_methods(self).keys
       end
@@ -53,7 +51,7 @@ module RSpec
         path.delete_prefix(
           Dir.pwd + "/"
         ).gsub(
-          %r{#{Dir.home}/.rbenv/.*/gems/},
+          %r{.*/gems/},
           ".../gems/"
         ).sub(Dir.home, "~")
       end
