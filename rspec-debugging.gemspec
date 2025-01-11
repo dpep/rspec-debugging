@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/dpep/rspec-debugging"
   s.license     = "MIT"
   s.name        = File.basename(__FILE__, ".gemspec")
-  s.summary     = "RSpec::Debugging"
+  s.summary     = s.description
   s.version     = "0.0.1"
 
   s.required_ruby_version = ">= 3.1"
