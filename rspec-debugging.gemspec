@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.license     = "MIT"
   s.name        = File.basename(__FILE__, ".gemspec")
   s.summary     = s.description
-  s.version     = "0.0.1"
+  s.version     = "0.0.2"
 
   s.required_ruby_version = ">= 3.1"
 
