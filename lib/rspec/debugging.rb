@@ -1,5 +1,6 @@
 require "rspec/expectations"
 
+require "rspec/debugging/debug_it"
 require "rspec/debugging/let_variables"
 require "rspec/debugging/version"
 
