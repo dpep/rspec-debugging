@@ -1,5 +1,5 @@
 module RSpec
   module Debugging
-    VERSION = Gem.loaded_specs["rspec-debugging"].version.to_s
+    VERSION = "0.0.2"
   end
 end
