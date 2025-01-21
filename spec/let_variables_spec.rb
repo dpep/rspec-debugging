@@ -61,5 +61,21 @@ describe RSpec::Debugging do
         expect(let_variable_initialized?(:c)).to be true
       end
     end
+
+    describe "let_variable_reset" do
+      let(:time) { Time.now.to_f }
+
+      it "resets a let variable" do
+        t = time
+
+        expect(let_variable_initialized?(:time)).to be true
+        expect(time).to eq t
+
+        let_variable_reset(:time)
+
+        expect(let_variable_initialized?(:time)).to be false
+        expect(time).to be > t
+      end
+    end
   end
 end

@@ -13,6 +13,10 @@ module RSpec
         __memoized.instance_variable_get("@memoized")[name]
       end
 
+      def let_variable_reset(name)
+        __memoized.instance_variable_get("@memoized").delete(name)
+      end
+
       def let_variable_locations(name)
         let_variable_methods(self)[name].map do |fn|
           normalize_path(fn.source_location.join(":"))
