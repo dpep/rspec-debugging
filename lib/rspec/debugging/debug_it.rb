@@ -17,7 +17,7 @@ module RSpec
             end
 
             if e
-              STDERR.puts <<~MSG
+              $stderr.puts <<~MSG
 
               Error:
               #{e.message}
@@ -32,15 +32,18 @@ module RSpec
           # called with no block
           user_metadata.delete(:skip)
 
-          file, line = caller[2].split(":")
+          location = RSpec::Core::Metadata.relative_path(caller[2].split(":in").first)
 
           example_block = Proc.new do
-            STDERR.puts <<~MSG
-            debugging: #{file}:#{line}
+            $stderr.puts <<~MSG
+            debugging: #{location}
 
             MSG
 
             debugger
+          end.tap do |block|
+            # redefine source_location to return the correct location
+            block.define_singleton_method(:source_location) { location.split(":") }
           end
         end
 

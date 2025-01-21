@@ -17,7 +17,7 @@ require Dir.glob("*.gemspec")[0].split(".")[0]
 
 RSpec.configure do |config|
   # allow "fit" examples
-  config.filter_run_when_matching :focus
+  # config.filter_run_when_matching :focus
 
   # expect { ... }.to fail
   config.include RSpec::Matchers::FailMatchers
