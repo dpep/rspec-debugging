@@ -7,7 +7,6 @@ describe RSpec::Debugging do
     # dit
 
     # dit "it explodes and debugs" do
-    #   expect(DEBUGGER__::SESSION).to receive(:enter_postmortem_session)
     #   expect(a).to eq("az")
     # end
 
