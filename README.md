@@ -86,3 +86,10 @@ Yes please  :)
 1. Commit your changes (`git commit -am 'awesome new feature'`)
 1. Push your branch (`git push origin my-feature`)
 1. Create a Pull Request
+
+
+----
+### Inspired by
+
+- [@alexdean](https://github.com/alexdean)
+- [rspec-debug](https://github.com/ko1/rspec-debug)
