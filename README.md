@@ -6,6 +6,7 @@ rspec-debugging
 
 Tools to make debugging RSpec tests easier.
 
+<br />
 
 Debug broken specs
 ----
@@ -19,6 +20,12 @@ describe MySpec do
 end
 ```
 
+or set an environment variable to run and debug all specs:
+```
+RSPEC_DEBUGGING=true bundle exec rspec
+```
+
+<br />
 
 Stop and explore
 ----
@@ -30,6 +37,7 @@ describe MySpec do
 end
 ```
 
+<br />
 
 Got let variables?
 ----
@@ -60,20 +68,26 @@ describe RSpec::Debugging do
 
 ...add a hundred lines of legacy code and then solve for `a`.  Or use tooling :)
 
+<br />
+
+----
+
 ### let_variables
-* Returns the list of variables defined by RSpec `let`
+* list of variables defined by RSpec `let`
 
 
 ### let_variable_initialized?(name)
-* Has the specified let variable been initialized?
+* whether a specified let variable been initialized
 
 
 ### let_variable_get(name)
-* Returns the value of a let variable, if initialized
+* the value of a let variable, if initialized
 
 ### let_variable_values(name)
-* Return all locations where the specified variable has been defined or redefined, and it's value at each location.
+* all locations where the specified variable has been defined or redefined, and it's value at each location
 
+
+<br />
 
 ----
 ## Contributing
@@ -87,6 +101,8 @@ Yes please  :)
 1. Push your branch (`git push origin my-feature`)
 1. Create a Pull Request
 
+
+<br />
 
 ----
 ### Inspired by
