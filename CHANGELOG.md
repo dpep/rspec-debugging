@@ -1,3 +1,8 @@
+###  0.0.4  (2025-02-08)
+- dependency fix
+- readme
+- inspired by
+
 ###  0.0.3  (2025-01-21)
 - let_variable_reset
 - test coverage
