@@ -1,3 +1,4 @@
+require 'debug'
 require 'debug/session'
 
 module RSpec
