@@ -7,20 +7,31 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    debug (1.9.2)
+    cgi (0.5.1)
+    date (3.5.1)
+    debug (1.11.1)
       irb (~> 1.10)
       reline (>= 0.3.8)
     diff-lcs (1.6.2)
     docile (1.4.1)
-    io-console (0.7.2)
-    irb (1.14.1)
+    erb (4.0.4)
+      cgi (>= 0.3.3)
+    io-console (0.8.2)
+    irb (1.16.0)
+      pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    psych (5.2.0)
+    pp (0.6.3)
+      prettyprint
+    prettyprint (0.2.0)
+    psych (5.3.1)
+      date
       stringio
-    rdoc (6.8.1)
+    rdoc (7.0.1)
+      erb
       psych (>= 4.0.0)
-    reline (0.5.11)
+      tsort
+    reline (0.6.3)
       io-console (~> 0.5)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
@@ -41,7 +52,8 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.13.1)
     simplecov_json_formatter (0.1.4)
-    stringio (3.1.2)
+    stringio (3.2.0)
+    tsort (0.2.0)
 
 PLATFORMS
   arm64-darwin-24
