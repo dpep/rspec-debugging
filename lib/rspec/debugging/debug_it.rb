@@ -7,8 +7,10 @@ module RSpec
       ENABLED = ['1', 'true'].include?(ENV['RSPEC_DEBUGGING'])
 
       # Skip, an expected failure of a pending example, and exit aren't failures.
+      # Nor is anything once the run is stopping.
       def self.failure?(error)
-        !RSpec.current_example.pending? &&
+        !RSpec.world.wants_to_quit &&
+          !RSpec.current_example.pending? &&
           !error.is_a?(RSpec::Core::Pending::SkipDeclaredInExample) &&
           RSpec::Support::AllExceptionsExceptOnesWeMustNotRescue === error
       end

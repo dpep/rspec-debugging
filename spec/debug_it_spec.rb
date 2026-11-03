@@ -51,6 +51,17 @@ describe RSpec::Debugging::DebugIt do
       expect(status(skipped)).to be_nil
     end
 
+    it "doesn't reopen the debugger for an after hook failing in the same example" do
+      allow(DEBUGGER__::SESSION).to receive(:enter_postmortem_session).and_raise(SystemExit)
+
+      run_group do
+        after { raise "after" }
+        dit("x") { raise "boom" }
+      end
+
+      expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session).once
+    end
+
     it "stops the run from a blockless dit" do
       allow_any_instance_of(Object).to receive(:debugger).and_raise(SystemExit)
 
