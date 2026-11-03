@@ -29,11 +29,14 @@ module RSpec
         hook = TracePoint.new(:raise) do |tp|
           # C frames have a nil path on Ruby 4.0
           frames[tp.raised_exception] = DEBUGGER__.capture_frames(nil).reject { |f| f.path&.match?(HIDDEN_FRAMES) }
+        rescue StandardError
+          # WeakKeyMap calls the exception's #hash; if that raises, skip it
         end
 
         hook.enable(target_thread: Thread.current) { yield }
       rescue Exception => error
-        frames.key?(error) ? [error, frames[error]] : raise
+        found = (frames[error] rescue nil)
+        found ? [error, found] : raise
       end
 
       # Skip, an expected failure of a pending example, and exit aren't failures.

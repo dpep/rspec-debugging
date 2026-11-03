@@ -393,6 +393,20 @@ describe RSpec::Debugging::DebugIt do
       expect(example.exception).to be_a(abstract)
     end
 
+    it "copes with exceptions whose hash raises" do
+      unhashable = Class.new(StandardError) do
+        def hash = raise(NoMethodError, "no hash")
+      end
+
+      passed, failed = run_group do
+        dit("rescued") { expect { raise unhashable }.to raise_error(unhashable) }
+        dit("failure") { raise unhashable, "boom" }
+      end
+
+      expect(status(passed)).to eq(:passed)
+      expect(failed.exception).to be_a(unhashable)
+    end
+
     it "doesn't keep rescued exceptions alive", skip: !defined?(ObjectSpace::WeakKeyMap) && "needs Ruby 3.3" do
       rescued = Class.new(StandardError)
 
