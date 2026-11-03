@@ -6,12 +6,14 @@ module RSpec
     module DebugIt
       ENABLED = ['1', 'true'].include?(ENV['RSPEC_DEBUGGING'])
 
+      GEM_LIB = %r{\A#{Regexp.escape(File.expand_path("../..", __dir__))}/}
+
       # Frames to hide from the postmortem: rspec's gems and executable, and this
       # gem. Anchored to those dirs so user code under lib/rspec/ stays visible.
       HIDDEN_FRAMES = Regexp.union(
         %r{/rspec-(core|expectations|mocks|support)(-[^/]+)?/lib/},
         %r{/(exe|bin)/rspec\z},
-        %r{\A#{Regexp.escape(File.expand_path("../..", __dir__))}/},
+        GEM_LIB,
       )
 
       # Mirrors debug's SESSION.capture_exception_frames, which tags every
@@ -130,6 +132,8 @@ module RSpec
 end
 
 RSpec::Core::Example.prepend RSpec::Debugging::DebugIt
+# a gem install is already hidden by RSpec's /gems/ pattern; this covers a path or git checkout
+RSpec.configuration.backtrace_exclusion_patterns << RSpec::Debugging::DebugIt::GEM_LIB
 # :dit marks the example itself; :debug is also inherited from ddescribe/dcontext
 RSpec::Core::ExampleGroup.define_example_method(:dit, debug: true, focus: true, dit: true)
 RSpec::Core::ExampleGroup.define_example_group_method(:ddescribe, debug: true, focus: true)

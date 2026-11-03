@@ -320,6 +320,12 @@ describe RSpec::Debugging::DebugIt do
     end
   end
 
+  it "hides this gem's frames from failure backtraces" do
+    line = "#{File.expand_path("../lib/rspec/debugging/debug_it.rb", __dir__)}:1:in 'run'"
+
+    expect(RSpec.configuration.backtrace_exclusion_patterns).to include(satisfy { |pattern| pattern.match?(line) })
+  end
+
   describe "the user's exceptions" do
     it "leaves rescued exceptions untouched, so they still marshal" do
       example, = run_group do
