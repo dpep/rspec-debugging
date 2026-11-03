@@ -252,6 +252,40 @@ describe RSpec::Debugging::DebugIt do
     end
   end
 
+  describe "postmortem frames" do
+    require_relative "debug_it_fixtures/lib/rspec/extension"
+    require_relative "debug_it_fixtures/lib/rspec-proj/code"
+
+    def postmortem_paths(&body)
+      error = nil
+      allow(DEBUGGER__::SESSION).to receive(:enter_postmortem_session) { |e| error = e }
+
+      run_group { dit("x", &body) }
+
+      error.instance_variable_get(:@__debugger_postmortem_frames).map(&:path)
+    end
+
+    it "hides rspec and this gem, and shows the spec" do
+      paths = postmortem_paths { raise "boom" }
+
+      expect(paths).to include(__FILE__)
+      expect(paths.grep(%r{/rspec-(core|expectations|mocks|support)\b})).to be_empty
+      expect(paths.grep(/\A#{File.expand_path("../lib", __dir__)}\//)).to be_empty
+    end
+
+    it "shows user code under lib/rspec/" do
+      paths = postmortem_paths { DebugItFixtures.extension_boom }
+
+      expect(paths.first).to end_with("debug_it_fixtures/lib/rspec/extension.rb")
+    end
+
+    it "shows user code in a project under lib/rspec-*/" do
+      paths = postmortem_paths { DebugItFixtures.project_boom }
+
+      expect(paths.first).to end_with("debug_it_fixtures/lib/rspec-proj/code.rb")
+    end
+  end
+
   it "reports the location where dit was written" do
     example, = run_group { dit("x") {} }
 

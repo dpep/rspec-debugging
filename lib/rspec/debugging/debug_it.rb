@@ -6,6 +6,16 @@ module RSpec
     module DebugIt
       ENABLED = ['1', 'true'].include?(ENV['RSPEC_DEBUGGING'])
 
+      # Frames to hide from the postmortem: rspec's gems and executable, and this
+      # gem. Anchored to those dirs so user code under lib/rspec/ stays visible.
+      # Regexps only: debug calls start_with? on a String one, and C frames on
+      # Ruby 4.0 have a nil path.
+      HIDDEN_FRAMES = [
+        %r{/rspec-(core|expectations|mocks|support)(-[^/]+)?/lib/},
+        %r{/(exe|bin)/rspec\z},
+        %r{\A#{Regexp.escape(File.expand_path("../..", __dir__))}/},
+      ].freeze
+
       # Skip, an expected failure of a pending example, and exit aren't failures.
       # Nor is anything once the run is stopping.
       def self.failure?(error)
@@ -66,7 +76,7 @@ module RSpec
           example = RSpec.current_example
           return super unless example && args.first.equal?(example)
 
-          error = DEBUGGER__::SESSION.capture_exception_frames(%r{(exe|bin|lib)/rspec}) { return super }
+          error = DEBUGGER__::SESSION.capture_exception_frames(*HIDDEN_FRAMES) { return super }
           raise error unless DebugIt.failure?(error)
 
           $stderr.puts <<~MSG
