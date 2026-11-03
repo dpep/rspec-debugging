@@ -1,4 +1,4 @@
-###  Unreleased
+###  0.0.6  (2026-11-03)
 - fix: an example that closes `$stdin` and then fails skips the postmortem debugger instead of crashing its thread with `IOError: closed stream`
 
 ###  0.0.5  (2026-11-03)
