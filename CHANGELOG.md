@@ -21,6 +21,7 @@
 - fix: blockless `it` placeholders inside `ddescribe` / `dcontext` stay pending instead of becoming breakpoints that report as passed
 - fix: `dit` no longer opens the debugger when stderr isn't a TTY (e.g. `rspec --bisect` children, which showed a bare debugger prompt)
 - fix: `--dry-run` reports a blockless `dit` as pending, not passed
+- fix: let helpers no longer treat a described class whose name contains `LetDefinitions` as a source of let variables
 
 ###  0.0.4  (2025-02-08)
 - dependency fix

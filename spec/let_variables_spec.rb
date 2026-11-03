@@ -176,3 +176,14 @@ describe RSpec::Debugging do
     end
   end
 end
+
+# a described class whose name contains "LetDefinitions" isn't a let module
+LetDefinitionsLookalike = Class.new
+
+describe LetDefinitionsLookalike do
+  let(:a) { "a" }
+
+  it "only lists let variables" do
+    expect(let_variables).to eq [:a]
+  end
+end

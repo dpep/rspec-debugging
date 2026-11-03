@@ -51,7 +51,7 @@ module RSpec
 
         # let name => definitions, innermost scope first
         def definitions(example)
-          mods = example.class.ancestors.select { |x| x.to_s.include?("::LetDefinitions") }
+          mods = example.class.ancestors.select { |x| x.name&.end_with?("::LetDefinitions") }
 
           mods.each_with_object({}) do |mod, defs|
             mod.instance_methods.each do |name|
