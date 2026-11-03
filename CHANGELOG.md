@@ -17,15 +17,12 @@
 - fix: let helpers work inside `before(:context)` (lets read as uninitialized) instead of raising `undefined method 'key?' for nil`
 - fix: `let_variable_values` reports the right value for a definition that calls `super()` after the let has been memoized (it used to build on the memoized value)
 - fix: `let_variable_values` passes the current example to `let(:x) { |example| ... }` definitions instead of reporting an `ArgumentError`
-- fix: an error raised inside `instance_exec` in a thread started by a debugged example is no longer replaced by a `NoMethodError`
-- fix: blockless `it` placeholders inside `ddescribe` / `dcontext` stay pending instead of becoming breakpoints that report as passed
 - fix: `dit` no longer opens the debugger when stderr isn't a TTY (e.g. `rspec --bisect` children, which showed a bare debugger prompt)
 - fix: `--dry-run` reports a blockless `dit` as pending, not passed
 - fix: let helpers no longer treat a described class whose name contains `LetDefinitions` as a source of let variables
 - fix: `dit` no longer opens the debugger when stdout is redirected (e.g. `rspec -f json > out.json`), which looked like a hang and corrupted the output
 - fix: the postmortem no longer hides your own code under `lib/rspec/` or in a project checked out under `lib/rspec-*/`
 - fix: a blockless `dit` under `xdescribe`, a skipped group, or `pending` (on the group or itself) stays pending instead of becoming a breakpoint
-- fix: a test that closes `$stdin` (or another std stream) no longer makes every example in its group fail
 - fix: debugged examples no longer tag exceptions with debugger state, so rescued errors and failures can be marshaled again, and raising a frozen exception no longer crashes with "exception reentered"
 - fix: rspec-debugging's own frames no longer appear in failure backtraces when the gem is loaded from a path or git checkout
 
