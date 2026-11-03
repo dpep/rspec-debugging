@@ -20,7 +20,47 @@ describe RSpec::Debugging::DebugIt do
   end
 
   before do
+    allow($stdin).to receive(:tty?).and_return(true)
     allow(DEBUGGER__::SESSION).to receive(:enter_postmortem_session)
+  end
+
+  describe "without a TTY" do
+    before { allow($stdin).to receive(:tty?).and_return(false) }
+
+    it "runs dit like it" do
+      examples = run_group do
+        dit
+        dit("x") { raise "boom" }
+      end
+
+      expect(DEBUGGER__::SESSION).not_to have_received(:enter_postmortem_session)
+      expect(examples.map { |ex| status(ex) }).to eq([:pending, :failed])
+    end
+  end
+
+  describe "quitting the debugger" do
+    it "fails the example and stops the run" do
+      allow(DEBUGGER__::SESSION).to receive(:enter_postmortem_session).and_raise(SystemExit)
+
+      failed, skipped = run_group do
+        dit("x") { raise "boom" }
+        it("y") {}
+      end
+
+      expect(status(failed)).to eq(:failed)
+      expect(status(skipped)).to be_nil
+    end
+
+    it "stops the run from a blockless dit" do
+      allow_any_instance_of(Object).to receive(:debugger).and_raise(SystemExit)
+
+      _, skipped = run_group do
+        dit
+        it("y") {}
+      end
+
+      expect(status(skipped)).to be_nil
+    end
   end
 
   around do |example|

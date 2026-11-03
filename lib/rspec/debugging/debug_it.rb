@@ -7,7 +7,7 @@ module RSpec
       ENABLED = ['1', 'true'].include?(ENV['RSPEC_DEBUGGING'])
 
       def initialize(example_group_class, description, user_metadata, example_block=nil)
-        if example_block.nil? && user_metadata[:debug] && user_metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED
+        if example_block.nil? && user_metadata[:debug] && user_metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED && $stdin.tty?
           user_metadata.delete(:skip)
 
           location = RSpec::Core::Metadata.relative_path(caller[2].split(":in").first)
@@ -18,7 +18,7 @@ module RSpec
 
             MSG
 
-            debugger
+            DebugIt.session { debugger }
           end.tap do |block|
             # redefine source_location to return the correct location
             block.define_singleton_method(:source_location) { location.split(":") }
@@ -35,8 +35,16 @@ module RSpec
           RSpec::Support::AllExceptionsExceptOnesWeMustNotRescue === error
       end
 
+      # Quitting the debugger raises SystemExit, which would end the run as a
+      # pass. Stop the run instead; the examples it skips make it fail.
+      def self.session
+        yield
+      rescue SystemExit
+        RSpec.world.wants_to_quit = true
+      end
+
       def run(example_group_instance, reporter)
-        example_group_instance.extend(Postmortem) if ENABLED || metadata[:debug]
+        example_group_instance.extend(Postmortem) if (ENABLED || metadata[:debug]) && $stdin.tty?
         super
       end
 
@@ -58,7 +66,7 @@ module RSpec
 
           MSG
 
-          DEBUGGER__::SESSION.enter_postmortem_session(error)
+          DebugIt.session { DEBUGGER__::SESSION.enter_postmortem_session(error) }
           raise error
         end
       end
