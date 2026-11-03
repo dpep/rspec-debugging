@@ -1,4 +1,12 @@
 ###  Unreleased
+- feature: failures in `before` / `after` hooks and `let!` now open the postmortem debugger
+- feature: the postmortem banner lists the names of initialized `let` variables
+- fix: quitting the debugger no longer ends the run as a pass; the failing example is reported and the run stops with a non-zero exit
+- fix: `dit` never opens the debugger when stdin isn't a TTY (CI), so it can't block a run
+- fix: `dit` blocks that take the example (`dit "x" do |example|`) receive it again instead of nil
+- fix: examples inside `ddescribe` / `dcontext` now open the debugger
+- fix: `skip`, `pending` and `exit` no longer open the debugger; only real failures do
+- fix: blockless `dit` reports the right location on Ruby 4.0, and blockless `it` / `dit ... do` examples no longer report a location inside rspec-debugging
 - fix: declare `debug` and `rspec-core` as runtime dependencies; the gem failed to load (`LoadError: cannot load such file -- debug`) in a bundle without `debug`
 - drop Ruby 3.1 (end of life); requires Ruby >= 3.2
 - fix: `let_variable_values` no longer memoizes the lets its definitions reference, so inspecting a let doesn't change what the example does next
