@@ -76,6 +76,17 @@ end
 Good to know
 ----
 * `dit` and friends tag examples `focus: true`, so they only narrow the run if your config has `config.filter_run_when_matching :focus`.
+* Keep a stray `dit` from being committed: [rubocop-rspec](https://github.com/rubocop/rubocop-rspec)'s `RSpec/Focus` cop flags them once they're in its list of focused methods (`fit` and friends stay flagged):
+
+  ```yaml
+  # .rubocop.yml
+  RSpec:
+    Language:
+      ExampleGroups:
+        Focused: [ddescribe, dcontext]
+      Examples:
+        Focused: [dit]
+  ```
 * The debugger only opens when stdin, stdout and stderr are all terminals. Redirect any of them (CI, or `rspec -f json > out.json`) and nothing interactive happens, so a stray `dit` won't hang CI. It still tags `focus: true`, though, so like a stray `fit` it can narrow the run to that one example. A blockless `dit` reports as pending ("Not yet implemented").
 * A `Timeout`-style `around` hook (`Timeout.timeout(n) { ex.run }`) keeps ticking while you debug. When it expires, it breaks the debugger session and the example fails with the timeout instead of the original error.
 * `skip` and `pending` don't open the debugger; only real failures do.
