@@ -135,5 +135,22 @@ describe RSpec::Debugging do
         expect(time).to be > t
       end
     end
+
+    context "in a before(:context) hook" do
+      results = nil
+
+      before(:context) do
+        results = {
+          initialized: let_variable_initialized?(:a),
+          get: let_variable_get(:a),
+          reset: let_variable_reset(:a),
+          values: let_variable_values(:a).flat_map(&:values),
+        }
+      end
+
+      it "treats every let as uninitialized" do
+        expect(results).to eq(initialized: false, get: nil, reset: nil, values: ["a"])
+      end
+    end
   end
 end

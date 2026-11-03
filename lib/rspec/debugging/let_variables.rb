@@ -6,15 +6,15 @@ module RSpec
       end
 
       def let_variable_initialized?(name)
-        __memoized.instance_variable_get("@memoized").key?(Internal.resolve(self, name))
+        Internal.memoized(self).key?(Internal.resolve(self, name))
       end
 
       def let_variable_get(name)
-        __memoized.instance_variable_get("@memoized")[Internal.resolve(self, name)]
+        Internal.memoized(self)[Internal.resolve(self, name)]
       end
 
       def let_variable_reset(name)
-        __memoized.instance_variable_get("@memoized").delete(Internal.resolve(self, name))
+        Internal.memoized(self).delete(Internal.resolve(self, name))
       end
 
       def let_variable_locations(name)
@@ -24,7 +24,7 @@ module RSpec
       end
 
       def let_variable_values(name)
-        memo = __memoized.instance_variable_get("@memoized")
+        memo = Internal.memoized(self)
 
         Internal.definitions(self)[Internal.resolve(self, name)].map do |fn|
           snapshot = memo.dup
@@ -63,6 +63,11 @@ module RSpec
           return name if definitions(example).key?(name)
 
           raise ArgumentError, "no let variable named #{name.inspect}"
+        end
+
+        def memoized(example)
+          # before(:context) swaps in a memo object with no hash
+          example.instance_variable_get(:@__memoized).instance_variable_get(:@memoized) || {}
         end
 
         def location(fn)
