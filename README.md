@@ -14,7 +14,7 @@ gem "rspec-debugging"
 require "rspec/debugging"
 ```
 
-Requires Ruby >= 3.2. The [debug](https://github.com/ruby/debug) gem comes along as a dependency.
+Built on the [debug](https://github.com/ruby/debug) gem.
 
 <br />
 
