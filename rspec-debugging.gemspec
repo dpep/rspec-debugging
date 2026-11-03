@@ -1,3 +1,5 @@
+require_relative "lib/rspec/debugging/version"
+
 Gem::Specification.new do |s|
   s.authors     = ["Daniel Pepper"]
   s.description = "Tools to improve debugging in RSpec"
@@ -6,7 +8,13 @@ Gem::Specification.new do |s|
   s.license     = "MIT"
   s.name        = File.basename(__FILE__, ".gemspec")
   s.summary     = s.description
-  s.version     = "0.0.4"
+  s.version     = RSpec::Debugging::VERSION
+
+  s.metadata = {
+    "changelog_uri" => "#{s.homepage}/blob/main/CHANGELOG.md",
+    "rubygems_mfa_required" => "true",
+    "source_code_uri" => s.homepage,
+  }
 
   s.required_ruby_version = ">= 3.2"
 
