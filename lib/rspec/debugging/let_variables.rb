@@ -26,8 +26,11 @@ module RSpec
       def let_variable_values(name)
         memo = Internal.memoized(self)
 
-        Internal.definitions(self)[Internal.resolve(self, name)].map do |fn|
+        name = Internal.resolve(self, name)
+
+        Internal.definitions(self)[name].map do |fn|
           snapshot = memo.dup
+          memo.delete(name) # else super() reads the memoized value via the outer wrapper
           value = begin
             fn.bind_call(self)
           rescue => e

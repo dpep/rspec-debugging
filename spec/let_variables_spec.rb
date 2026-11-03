@@ -80,6 +80,20 @@ describe RSpec::Debugging do
           expect(outer).to eq "b"
         end
       end
+
+      context "when definitions call super" do
+        let(:c) { super() + "!" }
+
+        context "twice" do
+          let(:c) { super() + "?" }
+
+          it "ignores the memoized value" do
+            expect(c).to eq "c!?"
+            expect(let_variable_values(:c).flat_map(&:values)).to eq(["c!?", "c!", "c"])
+            expect(let_variable_get(:c)).to eq "c!?"
+          end
+        end
+      end
     end
 
     describe "names" do
