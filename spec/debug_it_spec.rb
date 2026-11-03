@@ -240,6 +240,17 @@ describe RSpec::Debugging::DebugIt do
       expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session).twice
     end
 
+    it "leaves blockless it placeholders inside them pending" do
+      expect_any_instance_of(Object).not_to receive(:debugger)
+
+      examples = run_group do
+        ddescribe("d") { it "todo" }
+        dcontext("c") { it "todo" }
+      end
+
+      expect(examples.map { |ex| status(ex) }).to all(eq(:pending))
+    end
+
     it "leaves plain groups alone" do
       run_group { it("x") { raise "boom" } }
 

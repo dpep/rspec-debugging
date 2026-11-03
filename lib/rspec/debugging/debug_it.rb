@@ -27,7 +27,7 @@ module RSpec
       # become the location RSpec records for blockless examples.
       def run(example_group_instance, reporter)
         if (ENABLED || metadata[:debug]) && $stdin.tty?
-          debug_blockless if metadata[:debug] && metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED
+          debug_blockless if metadata[:dit] && metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED
           example_group_instance.extend(Postmortem)
         end
 
@@ -84,6 +84,7 @@ module RSpec
 end
 
 RSpec::Core::Example.prepend RSpec::Debugging::DebugIt
-RSpec::Core::ExampleGroup.define_example_method(:dit, debug: true, focus: true)
+# :dit marks the example itself; :debug is also inherited from ddescribe/dcontext
+RSpec::Core::ExampleGroup.define_example_method(:dit, debug: true, focus: true, dit: true)
 RSpec::Core::ExampleGroup.define_example_group_method(:ddescribe, debug: true, focus: true)
 RSpec::Core::ExampleGroup.define_example_group_method(:dcontext, debug: true, focus: true)
