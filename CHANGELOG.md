@@ -1,4 +1,4 @@
-###  Unreleased
+###  0.0.5  (2026-11-03)
 - feature: failures in `before` / `after` hooks and `let!` now open the postmortem debugger
 - feature: the postmortem banner lists the names of initialized `let` variables
 - fix: quitting the debugger no longer ends the run as a pass; the failing example is reported and the run stops with a non-zero exit

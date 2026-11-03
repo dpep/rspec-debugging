@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rspec-debugging (0.0.4)
+    rspec-debugging (0.0.5)
       debug (>= 1.10)
       rspec-core (>= 3.10)
 
