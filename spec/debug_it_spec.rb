@@ -71,6 +71,26 @@ describe RSpec::Debugging::DebugIt do
     end
   end
 
+  describe "not a failure" do
+    it "leaves skip and pending examples alone" do
+      examples = run_group do
+        dit("skip") { skip "not today" }
+        dit("pending") { pending "known bug"; expect(1).to eq(2) }
+        dit("pending metadata", pending: "known bug") { expect(1).to eq(2) }
+        context("skip in hook") { before { skip "not today" }; dit("x") {} }
+      end
+
+      expect(DEBUGGER__::SESSION).not_to have_received(:enter_postmortem_session)
+      expect(examples.map { |ex| status(ex) }).to all(eq(:pending))
+    end
+
+    it "lets exit through" do
+      expect { run_group { dit("x") { exit } } }.to raise_error(SystemExit)
+
+      expect(DEBUGGER__::SESSION).not_to have_received(:enter_postmortem_session)
+    end
+  end
+
   describe "hooks" do
     it "opens the postmortem when a before hook, let! or after hook fails" do
       examples = run_group do

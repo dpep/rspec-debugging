@@ -28,6 +28,13 @@ module RSpec
         super
       end
 
+      # Skip, an expected failure of a pending example, and exit aren't failures.
+      def self.failure?(error)
+        !RSpec.current_example.pending? &&
+          !error.is_a?(RSpec::Core::Pending::SkipDeclaredInExample) &&
+          RSpec::Support::AllExceptionsExceptOnesWeMustNotRescue === error
+      end
+
       def run(example_group_instance, reporter)
         example_group_instance.extend(Postmortem) if ENABLED || metadata[:debug]
         super
@@ -42,6 +49,7 @@ module RSpec
           return super unless args.first.equal?(RSpec.current_example)
 
           error = DEBUGGER__::SESSION.capture_exception_frames(%r{(exe|bin|lib)/rspec}) { return super }
+          raise error unless DebugIt.failure?(error)
 
           $stderr.puts <<~MSG
 
