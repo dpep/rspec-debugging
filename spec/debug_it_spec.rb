@@ -162,7 +162,8 @@ describe RSpec::Debugging::DebugIt do
         dit("x") { user; account; raise "boom" }
       end
 
-      expect($stderr.string).to include("initialized lets: user, account")
+      lets = $stderr.string[/^initialized lets: (.*)$/, 1].split(", ")
+      expect(lets).to contain_exactly("user", "account")
       expect($stderr.string).not_to include("unused")
       expect($stderr.string).not_to include("secret")
     end
