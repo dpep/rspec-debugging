@@ -59,6 +59,27 @@ describe RSpec::Debugging::DebugIt do
     it_behaves_like "runs dit like it"
   end
 
+  describe "with a closed stdin" do
+    # after the outer before, so the tty? stub stays on the real stdin
+    before do
+      @stdin = $stdin
+      $stdin = IO.pipe.each(&:close).first
+    end
+
+    after { $stdin = @stdin }
+
+    it "leaves plain examples alone" do
+      examples = run_group do
+        it("x") { expect(1).to eq(1) }
+        it("y") { expect(1).to eq(1) }
+      end
+
+      expect(examples.map { |ex| status(ex) }).to eq([:passed, :passed])
+    end
+
+    it_behaves_like "runs dit like it"
+  end
+
   describe "quitting the debugger" do
     it "fails the example and stops the run" do
       allow(DEBUGGER__::SESSION).to receive(:enter_postmortem_session).and_raise(SystemExit)

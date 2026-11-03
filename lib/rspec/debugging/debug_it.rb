@@ -33,15 +33,18 @@ module RSpec
         RSpec.world.wants_to_quit = true
       end
 
+      # The console reads stdin and writes stdout; our banner goes to stderr.
+      # Any one redirected (rspec -f json > out, --bisect children) or closed
+      # (tty? raises on a closed IO) means no one can drive it.
+      def self.interactive?
+        [$stdin, $stdout, $stderr].all? { |io| !io.closed? && io.tty? } &&
+          !RSpec.configuration.dry_run?
+      end
+
       # Hooks in at run time, not in initialize: an extra frame there would
       # become the location RSpec records for blockless examples.
       def run(example_group_instance, reporter)
-        # The console reads stdin and writes stdout; our banner goes to stderr.
-        # Any one redirected (rspec -f json > out, --bisect children) means no one
-        # can drive it.
-        interactive = [$stdin, $stdout, $stderr].all?(&:tty?) && !RSpec.configuration.dry_run?
-
-        if (ENABLED || metadata[:debug]) && interactive
+        if (ENABLED || metadata[:debug]) && DebugIt.interactive?
           debug_blockless if breakpoint?
           example_group_instance.extend(Postmortem)
         end
