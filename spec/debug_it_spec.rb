@@ -79,6 +79,33 @@ describe RSpec::Debugging::DebugIt do
 
       expect($stderr.string).to include("debugging: ")
     end
+
+    it "reports and prints the location where dit was written" do
+      allow_any_instance_of(Object).to receive(:debugger)
+
+      example, = run_group { dit }
+      location = "#{RSpec::Core::Metadata.relative_path(__FILE__)}:#{__LINE__ - 1}"
+
+      expect(example.location).to eq(location)
+      expect($stderr.string).to include("debugging: #{location}")
+    end
+
+    it "reports the location inside shared examples" do
+      allow_any_instance_of(Object).to receive(:debugger)
+
+      example, = run_group do
+        shared_examples("shared") { dit }
+        it_behaves_like "shared"
+      end
+
+      expect(example.location).to eq("#{RSpec::Core::Metadata.relative_path(__FILE__)}:#{__LINE__ - 4}")
+    end
+  end
+
+  it "leaves the location of a blockless it alone" do
+    example, = run_group { it "todo" }
+
+    expect(example.location).to eq("#{RSpec::Core::Metadata.relative_path(__FILE__)}:#{__LINE__ - 2}")
   end
 
   describe "dit with a block" do

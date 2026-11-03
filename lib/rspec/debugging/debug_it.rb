@@ -6,28 +6,6 @@ module RSpec
     module DebugIt
       ENABLED = ['1', 'true'].include?(ENV['RSPEC_DEBUGGING'])
 
-      def initialize(example_group_class, description, user_metadata, example_block=nil)
-        if example_block.nil? && user_metadata[:debug] && user_metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED && $stdin.tty?
-          user_metadata.delete(:skip)
-
-          location = RSpec::Core::Metadata.relative_path(caller[2].split(":in").first)
-
-          example_block = Proc.new do
-            $stderr.puts <<~MSG
-            debugging: #{location}
-
-            MSG
-
-            DebugIt.session { debugger }
-          end.tap do |block|
-            # redefine source_location to return the correct location
-            block.define_singleton_method(:source_location) { location.split(":") }
-          end
-        end
-
-        super
-      end
-
       # Skip, an expected failure of a pending example, and exit aren't failures.
       def self.failure?(error)
         !RSpec.current_example.pending? &&
@@ -43,9 +21,32 @@ module RSpec
         RSpec.world.wants_to_quit = true
       end
 
+      # Hooks in at run time, not in initialize: an extra frame there would
+      # become the location RSpec records for blockless examples.
       def run(example_group_instance, reporter)
-        example_group_instance.extend(Postmortem) if (ENABLED || metadata[:debug]) && $stdin.tty?
+        if (ENABLED || metadata[:debug]) && $stdin.tty?
+          debug_blockless if metadata[:debug] && metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED
+          example_group_instance.extend(Postmortem)
+        end
+
         super
+      end
+
+      private
+
+      # A blockless dit opens the debugger instead of being "Not yet implemented".
+      def debug_blockless
+        metadata.delete(:skip)
+        location = self.location
+
+        @example_block = Proc.new do
+          $stderr.puts <<~MSG
+          debugging: #{location}
+
+          MSG
+
+          DebugIt.session { debugger }
+        end
       end
 
       # Extended onto the example group instance a debugged example runs in.
