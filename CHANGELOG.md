@@ -1,3 +1,6 @@
+###  Unreleased
+- drop Ruby 3.1 (end of life); requires Ruby >= 3.2
+
 ###  0.0.4  (2025-02-08)
 - dependency fix
 - readme

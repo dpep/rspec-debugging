@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.summary     = s.description
   s.version     = "0.0.4"
 
-  s.required_ruby_version = ">= 3.1"
+  s.required_ruby_version = ">= 3.2"
 
   s.add_dependency "rspec-expectations", ">= 3"
 
