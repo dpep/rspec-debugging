@@ -25,6 +25,9 @@
 - fix: `dit` no longer opens the debugger when stdout is redirected (e.g. `rspec -f json > out.json`), which looked like a hang and corrupted the output
 - fix: the postmortem no longer hides your own code under `lib/rspec/` or in a project checked out under `lib/rspec-*/`
 - fix: a blockless `dit` under `xdescribe`, a skipped group, or `pending` (on the group or itself) stays pending instead of becoming a breakpoint
+- fix: a test that closes `$stdin` (or another std stream) no longer makes every example in its group fail
+- fix: debugged examples no longer tag exceptions with debugger state, so rescued errors and failures can be marshaled again, and raising a frozen exception no longer crashes with "exception reentered"
+- fix: rspec-debugging's own frames no longer appear in failure backtraces when the gem is loaded from a path or git checkout
 
 ###  0.0.4  (2025-02-08)
 - dependency fix
