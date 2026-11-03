@@ -55,9 +55,11 @@ module RSpec
       module Postmortem
         # rspec-core runs the example body and its before/after hooks (so let!
         # too) as instance_exec(example, &block). Around hooks get a Procsy, and
-        # user code passes other args, so a failure is only debugged once.
+        # user code passes other args, so a failure is only debugged once. In a
+        # thread there is no current example: leave that alone too.
         def instance_exec(*args, &block)
-          return super unless args.first.equal?(RSpec.current_example)
+          example = RSpec.current_example
+          return super unless example && args.first.equal?(example)
 
           error = DEBUGGER__::SESSION.capture_exception_frames(%r{(exe|bin|lib)/rspec}) { return super }
           raise error unless DebugIt.failure?(error)

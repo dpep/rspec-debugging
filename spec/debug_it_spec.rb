@@ -214,6 +214,14 @@ describe RSpec::Debugging::DebugIt do
 
       expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session).once
     end
+
+    it "keeps the error from instance_exec in a thread, where there's no current example" do
+      example, = run_group do
+        dit("x") { Thread.new { instance_exec { raise "boom" } }.tap { |t| t.report_on_exception = false }.join }
+      end
+
+      expect(example.exception.message).to eq("boom")
+    end
   end
 
   it "reports the location where dit was written" do
