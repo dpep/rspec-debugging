@@ -11,8 +11,17 @@ describe RSpec::Debugging do
 
     it { expect(self).to respond_to(:let_variables) }
 
-    it "does not expose helpers" do
-      expect(methods).not_to include(:normalize_path)
+    it "does not mix in private helpers" do
+      helpers = (methods + private_methods).grep(/normalize_path|let_variable_methods/)
+      expect(helpers).to be_empty
+    end
+
+    context "when the user defines a helper with the same name" do
+      def normalize_path(_path) = "USER"
+
+      it "does not use the user's helper" do
+        expect(let_variable_locations(:a)).to all(start_with("spec/"))
+      end
     end
 
     it "returns the defined let variables" do
