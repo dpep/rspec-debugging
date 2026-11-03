@@ -2,7 +2,8 @@ PATH
   remote: .
   specs:
     rspec-debugging (0.0.4)
-      rspec-expectations (>= 3)
+      debug (>= 1.10)
+      rspec-core (>= 3.10)
 
 GEM
   remote: https://rubygems.org/
@@ -60,7 +61,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  debug
   rspec
   rspec-debugging!
   simplecov

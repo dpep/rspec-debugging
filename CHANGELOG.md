@@ -1,4 +1,5 @@
 ###  Unreleased
+- fix: declare `debug` and `rspec-core` as runtime dependencies; the gem failed to load (`LoadError: cannot load such file -- debug`) in a bundle without `debug`
 - drop Ruby 3.1 (end of life); requires Ruby >= 3.2
 
 ###  0.0.4  (2025-02-08)
