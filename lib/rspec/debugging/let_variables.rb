@@ -32,7 +32,8 @@ module RSpec
           snapshot = memo.dup
           memo.delete(name) # else super() reads the memoized value via the outer wrapper
           value = begin
-            fn.bind_call(self)
+            # mirrors rspec-core's `let`, which passes the example to a 1-arity block
+            fn.arity == 1 ? fn.bind_call(self, RSpec.current_example) : fn.bind_call(self)
           rescue => e
             e
           ensure

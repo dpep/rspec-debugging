@@ -81,6 +81,14 @@ describe RSpec::Debugging do
         end
       end
 
+      context "when a definition takes the example" do
+        let(:description) { |example| example.description }
+
+        it "passes it the current example" do
+          expect(let_variable_values(:description).flat_map(&:values)).to eq([description])
+        end
+      end
+
       context "when definitions call super" do
         let(:c) { super() + "!" }
 
