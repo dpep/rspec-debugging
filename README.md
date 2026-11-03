@@ -28,14 +28,34 @@ describe MySpec do
 end
 ```
 
-Failures in `before` / `after` hooks and `let!` count too. The debugger prints the error and the names of any `let` variables that were initialized.
+Failures in `before` / `after` hooks and `let!` count too. Before the prompt opens, you get the error and the names of any `let` variables that were initialized:
+
+```
+Error:
+
+expected: "Bob"
+     got: "Ada"
+
+(compared using ==)
+
+
+initialized lets: user
+```
+
+Getting around: `c` (continue) re-raises the error, so the example fails as usual and the run carries on. `q` quits, which stops the run and fails it; it asks `Really quit? [Y/n]` first, and `q!` skips the question.
 
 Or debug every example, no code changes:
 ```
 RSPEC_DEBUGGING=true bundle exec rspec
 ```
 
-Tip: `RSPEC_DEBUGGING=true bundle exec rspec --only-failures --fail-fast` debugs the first remaining failure (`--only-failures` needs `config.example_status_persistence_file_path`). Use `rspec path/to/spec.rb:42` to target one example.
+Tip: `RSPEC_DEBUGGING=true bundle exec rspec --only-failures --fail-fast` debugs the first remaining failure. `--only-failures` needs one prior run and this line in your config:
+
+```ruby
+config.example_status_persistence_file_path = "spec/examples.txt"
+```
+
+Use `rspec path/to/spec.rb:42` to target one example.
 
 <br />
 
@@ -56,8 +76,8 @@ end
 Good to know
 ----
 * `dit` and friends tag examples `focus: true`, so they only narrow the run if your config has `config.filter_run_when_matching :focus`.
-* Without a TTY on stdin and stderr, nothing interactive happens. `dit` runs like `it`, so a stray one won't hang CI.
-* Quitting the debugger stops the run, and the run fails.
+* The debugger only opens when stdin, stdout and stderr are all terminals. Redirect any of them (CI, or `rspec -f json > out.json`) and nothing interactive happens, so a stray `dit` won't hang CI. It still tags `focus: true`, though, so like a stray `fit` it can narrow the run to that one example. A blockless `dit` reports as pending ("Not yet implemented").
+* A `Timeout`-style `around` hook (`Timeout.timeout(n) { ex.run }`) keeps ticking while you debug. When it expires, it breaks the debugger session and the example fails with the timeout instead of the original error.
 * `skip` and `pending` don't open the debugger; only real failures do.
 * Not covered: `before(:all)` failures, unmet mock expectations, and `aggregate_failures`.
 * While debugging, every raised exception has its frames captured — even ones your code rescues — so `RSPEC_DEBUGGING=true` can slow down exception-heavy suites.
