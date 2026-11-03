@@ -15,6 +15,8 @@
 - fix: `let_variable_*(:subject)` follows a named subject (`subject(:thing)`) to its let instead of crashing or returning an outer group's subject
 - fix: the gem's private helpers (`normalize_path`, `let_variable_methods`) are no longer mixed into example groups, where they collided with user helpers of the same name
 - fix: let helpers work inside `before(:context)` (lets read as uninitialized) instead of raising `undefined method 'key?' for nil`
+- fix: `let_variable_values` reports the right value for a definition that calls `super()` after the let has been memoized (it used to build on the memoized value)
+- fix: `let_variable_values` passes the current example to `let(:x) { |example| ... }` definitions instead of reporting an `ArgumentError`
 
 ###  0.0.4  (2025-02-08)
 - dependency fix
