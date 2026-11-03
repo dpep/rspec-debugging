@@ -4,9 +4,10 @@ describe RSpec::Debugging::DebugIt do
   # Defines and runs a throwaway example group, isolated from this suite, and
   # returns its examples. Its examples don't use rspec-mocks, so our stubs here
   # stay intact.
-  def run_group(&block)
+  def run_group(dry_run: false, &block)
     RSpec::Core::Sandbox.sandboxed do |config|
       config.mock_with :nothing
+      config.dry_run = dry_run
       config.include RSpec::Debugging::LetVariables
 
       group = RSpec.describe("sandbox", &block)
@@ -95,6 +96,12 @@ describe RSpec::Debugging::DebugIt do
   end
 
   describe "blockless dit" do
+    it "stays pending in a dry run" do
+      example, = run_group(dry_run: true) { dit }
+
+      expect(status(example)).to eq(:pending)
+    end
+
     it "opens the debugger" do
       expect_any_instance_of(Object).to receive(:debugger)
 

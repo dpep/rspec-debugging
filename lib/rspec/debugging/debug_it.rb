@@ -27,7 +27,9 @@ module RSpec
       # become the location RSpec records for blockless examples.
       def run(example_group_instance, reporter)
         # rspec --bisect children keep the TTY on stdin but capture stderr
-        if (ENABLED || metadata[:debug]) && $stdin.tty? && $stderr.tty?
+        interactive = $stdin.tty? && $stderr.tty? && !RSpec.configuration.dry_run?
+
+        if (ENABLED || metadata[:debug]) && interactive
           debug_blockless if metadata[:dit] && metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED
           example_group_instance.extend(Postmortem)
         end
