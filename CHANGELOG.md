@@ -1,3 +1,6 @@
+###  Unreleased
+- fix: an example that closes `$stdin` and then fails skips the postmortem debugger instead of crashing its thread with `IOError: closed stream`
+
 ###  0.0.5  (2026-11-03)
 - feature: failures in `before` / `after` hooks and `let!` now open the postmortem debugger
 - feature: the postmortem banner lists the names of initialized `let` variables

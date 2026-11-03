@@ -112,7 +112,8 @@ module RSpec
           return super unless example && args.first.equal?(example)
 
           error, frames = DebugIt.capture_frames { return super }
-          raise error unless DebugIt.failure?(error)
+          # the example may have closed or swapped stdin since run checked
+          raise error unless DebugIt.failure?(error) && DebugIt.interactive?
 
           $stderr.puts <<~MSG
 

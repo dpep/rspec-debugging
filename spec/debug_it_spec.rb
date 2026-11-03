@@ -222,6 +222,22 @@ describe RSpec::Debugging::DebugIt do
       expect(status(example)).to eq(:passed)
     end
 
+    it "fails without the postmortem when the example closed stdin" do
+      stdin = $stdin
+
+      example, = run_group do
+        dit("x") do
+          $stdin = IO.pipe.each(&:close).first
+          raise "boom"
+        end
+      end
+
+      expect(DEBUGGER__::SESSION).not_to have_received(:enter_postmortem_session)
+      expect(status(example)).to eq(:failed)
+    ensure
+      $stdin = stdin
+    end
+
     it "stays out of the way when the example passes" do
       example, = run_group { dit("x") { expect(1).to eq(1) } }
 
