@@ -17,6 +17,10 @@
 - fix: let helpers work inside `before(:context)` (lets read as uninitialized) instead of raising `undefined method 'key?' for nil`
 - fix: `let_variable_values` reports the right value for a definition that calls `super()` after the let has been memoized (it used to build on the memoized value)
 - fix: `let_variable_values` passes the current example to `let(:x) { |example| ... }` definitions instead of reporting an `ArgumentError`
+- fix: an error raised inside `instance_exec` in a thread started by a debugged example is no longer replaced by a `NoMethodError`
+- fix: blockless `it` placeholders inside `ddescribe` / `dcontext` stay pending instead of becoming breakpoints that report as passed
+- fix: `dit` no longer opens the debugger when stderr isn't a TTY (e.g. `rspec --bisect` children, which showed a bare debugger prompt)
+- fix: `--dry-run` reports a blockless `dit` as pending, not passed
 
 ###  0.0.4  (2025-02-08)
 - dependency fix

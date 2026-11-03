@@ -56,7 +56,7 @@ end
 Good to know
 ----
 * `dit` and friends tag examples `focus: true`, so they only narrow the run if your config has `config.filter_run_when_matching :focus`.
-* Without a TTY on stdin, nothing interactive happens. `dit` runs like `it`, so a stray one won't hang CI.
+* Without a TTY on stdin and stderr, nothing interactive happens. `dit` runs like `it`, so a stray one won't hang CI.
 * Quitting the debugger stops the run, and the run fails.
 * `skip` and `pending` don't open the debugger; only real failures do.
 * Not covered: `before(:all)` failures, unmet mock expectations, and `aggregate_failures`.
