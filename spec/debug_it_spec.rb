@@ -71,6 +71,40 @@ describe RSpec::Debugging::DebugIt do
     end
   end
 
+  describe "hooks" do
+    it "opens the postmortem when a before hook, let! or after hook fails" do
+      examples = run_group do
+        context("before") { before { raise "before" }; dit("x") {} }
+        context("let!") { let!(:user) { raise "let!" }; dit("x") {} }
+        context("after") { after { raise "after" }; dit("x") {} }
+      end
+
+      expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session).thrice
+      expect(examples.map { |ex| status(ex) }).to all(eq(:failed))
+    end
+
+    it "opens the postmortem once when the example runs inside an around hook" do
+      run_group do
+        around { |ex| ex.run }
+        dit("x") { raise "boom" }
+      end
+
+      expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session).once
+    end
+
+    it "opens the postmortem once when the example calls instance_exec itself" do
+      run_group { dit("x") { instance_exec { raise "boom" } } }
+
+      expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session).once
+    end
+  end
+
+  it "reports the location where dit was written" do
+    example, = run_group { dit("x") {} }
+
+    expect(example.location).to eq("#{RSpec::Core::Metadata.relative_path(__FILE__)}:#{__LINE__ - 2}")
+  end
+
   describe "debug groups" do
     it "debugs examples inside ddescribe and dcontext" do
       run_group do

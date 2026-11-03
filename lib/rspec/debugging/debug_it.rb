@@ -7,30 +7,7 @@ module RSpec
       ENABLED = ['1', 'true'].include?(ENV['RSPEC_DEBUGGING'])
 
       def initialize(example_group_class, description, user_metadata, example_block=nil)
-        return super unless user_metadata[:debug] || example_group_class.metadata[:debug] || ENABLED
-
-        if example_block
-          orig_example_block = example_block
-
-          example_block = Proc.new do |*args|
-            e = DEBUGGER__::SESSION.capture_exception_frames /(exe|bin|lib)\/rspec/ do
-              instance_exec(*args, &orig_example_block)
-            end
-
-            if e
-              $stderr.puts <<~MSG
-
-              Error:
-              #{e.message}
-
-              MSG
-
-              DEBUGGER__::SESSION.enter_postmortem_session e
-              raise e
-            end
-          end # Proc.new
-        elsif user_metadata[:debug] && user_metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED
-          # called with no block
+        if example_block.nil? && user_metadata[:debug] && user_metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED
           user_metadata.delete(:skip)
 
           location = RSpec::Core::Metadata.relative_path(caller[2].split(":in").first)
@@ -49,6 +26,33 @@ module RSpec
         end
 
         super
+      end
+
+      def run(example_group_instance, reporter)
+        example_group_instance.extend(Postmortem) if ENABLED || metadata[:debug]
+        super
+      end
+
+      # Extended onto the example group instance a debugged example runs in.
+      module Postmortem
+        # rspec-core runs the example body and its before/after hooks (so let!
+        # too) as instance_exec(example, &block). Around hooks get a Procsy, and
+        # user code passes other args, so a failure is only debugged once.
+        def instance_exec(*args, &block)
+          return super unless args.first.equal?(RSpec.current_example)
+
+          error = DEBUGGER__::SESSION.capture_exception_frames(%r{(exe|bin|lib)/rspec}) { return super }
+
+          $stderr.puts <<~MSG
+
+          Error:
+          #{error.message}
+
+          MSG
+
+          DEBUGGER__::SESSION.enter_postmortem_session(error)
+          raise error
+        end
       end
     end
   end
