@@ -371,7 +371,29 @@ describe RSpec::Debugging::DebugIt do
       expect(example.exception).to be_a(uncopyable)
     end
 
-    it "doesn't keep rescued exceptions alive" do
+    it "still opens the postmortem if GC runs before the failure is caught" do
+      run_group do
+        dit("x") do
+          raise "boom"
+        ensure
+          GC.start
+        end
+      end
+
+      expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session)
+    end
+
+    it "reports the failure when copying it raises a non-StandardError" do
+      abstract = Class.new(StandardError) do
+        def initialize_copy(_) = raise(NotImplementedError)
+      end
+
+      example, = run_group { dit("x") { raise abstract, "boom" } }
+
+      expect(example.exception).to be_a(abstract)
+    end
+
+    it "doesn't keep rescued exceptions alive", skip: !defined?(ObjectSpace::WeakKeyMap) && "needs Ruby 3.3" do
       rescued = Class.new(StandardError)
 
       example, = run_group do
