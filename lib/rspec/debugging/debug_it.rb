@@ -7,7 +7,7 @@ module RSpec
       ENABLED = ['1', 'true'].include?(ENV['RSPEC_DEBUGGING'])
 
       def initialize(example_group_class, description, user_metadata, example_block=nil)
-        return super unless user_metadata[:debug] || ENABLED
+        return super unless user_metadata[:debug] || example_group_class.metadata[:debug] || ENABLED
 
         if example_block
           orig_example_block = example_block

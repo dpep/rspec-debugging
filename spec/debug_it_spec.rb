@@ -70,4 +70,21 @@ describe RSpec::Debugging::DebugIt do
       expect(status(example)).to eq(:passed)
     end
   end
+
+  describe "debug groups" do
+    it "debugs examples inside ddescribe and dcontext" do
+      run_group do
+        ddescribe("d") { it("x") { raise "boom" } }
+        dcontext("c") { context("nested") { it("y") { raise "boom" } } }
+      end
+
+      expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session).twice
+    end
+
+    it "leaves plain groups alone" do
+      run_group { it("x") { raise "boom" } }
+
+      expect(DEBUGGER__::SESSION).not_to have_received(:enter_postmortem_session)
+    end
+  end
 end
