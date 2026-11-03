@@ -60,6 +60,7 @@ Good to know
 * Quitting the debugger stops the run, and the run fails.
 * `skip` and `pending` don't open the debugger; only real failures do.
 * Not covered: `before(:all)` failures, unmet mock expectations, and `aggregate_failures`.
+* While debugging, every raised exception has its frames captured — even ones your code rescues — so `RSPEC_DEBUGGING=true` can slow down exception-heavy suites.
 
 <br />
 
@@ -127,6 +128,8 @@ Names can be a Symbol or a String. An unknown name raises `ArgumentError`.
 * every place the variable is defined, innermost first, with the value each definition produces
 * doesn't memoize anything, so the example carries on as if you never looked. If a definition raises, its error is its value.
 * it does run each definition, though, so external side effects (DB writes, HTTP calls) still happen
+
+The helpers only see `let` definitions: a plain `def` that overrides a `let` of the same name isn't detected.
 
 <br />
 
