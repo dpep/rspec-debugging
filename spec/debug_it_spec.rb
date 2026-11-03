@@ -21,12 +21,11 @@ describe RSpec::Debugging::DebugIt do
 
   before do
     allow($stdin).to receive(:tty?).and_return(true)
+    allow($stderr).to receive(:tty?).and_return(true)
     allow(DEBUGGER__::SESSION).to receive(:enter_postmortem_session)
   end
 
-  describe "without a TTY" do
-    before { allow($stdin).to receive(:tty?).and_return(false) }
-
+  shared_examples "runs dit like it" do
     it "runs dit like it" do
       examples = run_group do
         dit
@@ -36,6 +35,19 @@ describe RSpec::Debugging::DebugIt do
       expect(DEBUGGER__::SESSION).not_to have_received(:enter_postmortem_session)
       expect(examples.map { |ex| status(ex) }).to eq([:pending, :failed])
     end
+  end
+
+  describe "without a TTY" do
+    before { allow($stdin).to receive(:tty?).and_return(false) }
+
+    it_behaves_like "runs dit like it"
+  end
+
+  # e.g. rspec --bisect children: a TTY on stdin, but stderr captured
+  describe "when stderr isn't a TTY" do
+    before { allow($stderr).to receive(:tty?).and_return(false) }
+
+    it_behaves_like "runs dit like it"
   end
 
   describe "quitting the debugger" do
