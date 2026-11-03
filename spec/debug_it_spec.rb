@@ -23,6 +23,7 @@ describe RSpec::Debugging::DebugIt do
   before do
     allow($stdin).to receive(:tty?).and_return(true)
     allow($stderr).to receive(:tty?).and_return(true)
+    allow($stdout).to receive(:tty?).and_return(true)
     allow(DEBUGGER__::SESSION).to receive(:enter_postmortem_session)
   end
 
@@ -47,6 +48,13 @@ describe RSpec::Debugging::DebugIt do
   # e.g. rspec --bisect children: a TTY on stdin, but stderr captured
   describe "when stderr isn't a TTY" do
     before { allow($stderr).to receive(:tty?).and_return(false) }
+
+    it_behaves_like "runs dit like it"
+  end
+
+  # e.g. rspec -f json > out.json: the debug console writes to stdout
+  describe "when stdout isn't a TTY" do
+    before { allow($stdout).to receive(:tty?).and_return(false) }
 
     it_behaves_like "runs dit like it"
   end

@@ -26,8 +26,10 @@ module RSpec
       # Hooks in at run time, not in initialize: an extra frame there would
       # become the location RSpec records for blockless examples.
       def run(example_group_instance, reporter)
-        # rspec --bisect children keep the TTY on stdin but capture stderr
-        interactive = $stdin.tty? && $stderr.tty? && !RSpec.configuration.dry_run?
+        # The console reads stdin and writes stdout; our banner goes to stderr.
+        # Any one redirected (rspec -f json > out, --bisect children) means no one
+        # can drive it.
+        interactive = [$stdin, $stdout, $stderr].all?(&:tty?) && !RSpec.configuration.dry_run?
 
         if (ENABLED || metadata[:debug]) && interactive
           debug_blockless if metadata[:dit] && metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED
