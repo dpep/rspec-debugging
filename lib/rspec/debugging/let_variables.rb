@@ -24,8 +24,19 @@ module RSpec
       end
 
       def let_variable_values(name)
+        memo = __memoized.instance_variable_get("@memoized")
+
         Internal.definitions(self)[Internal.resolve(self, name)].map do |fn|
-          { Internal.location(fn) => fn.bind(self).call }
+          snapshot = memo.dup
+          value = begin
+            fn.bind_call(self)
+          rescue => e
+            e
+          ensure
+            memo.replace(snapshot) # forget lets the definition pulled in
+          end
+
+          { Internal.location(fn) => value }
         end
       end
 

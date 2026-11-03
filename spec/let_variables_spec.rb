@@ -61,6 +61,27 @@ describe RSpec::Debugging do
       end
     end
 
+    describe "let_variable_values" do
+      it "does not initialize the lets a definition references" do
+        expect(let_variable_values(:letters).first.values).to eq([["a", "b", "c"]])
+
+        expect(let_variable_initialized?(:a)).to be true
+        expect(let_variable_initialized?(:b)).to be false
+        expect(let_variable_initialized?(:letters)).to be false
+      end
+
+      context "when a definition raises" do
+        let(:b) { raise "boom" }
+
+        it "returns the error for that definition only" do
+          inner, outer = let_variable_values(:b).flat_map(&:values)
+
+          expect(inner).to be_a(RuntimeError).and have_attributes(message: "boom")
+          expect(outer).to eq "b"
+        end
+      end
+    end
+
     describe "names" do
       it "accepts strings" do
         expect(let_variable_initialized?("a")).to be true
