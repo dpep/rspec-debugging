@@ -14,21 +14,22 @@ module RSpec
         %r{/rspec-(core|expectations|mocks|support)(-[^/]+)?/lib/},
         %r{/(exe|bin)/rspec\z},
         GEM_LIB,
+        %r{\A<internal:trace_point>\z},
       )
 
       # Mirrors debug's SESSION.capture_exception_frames, which tags every
       # exception raised on any thread while it runs, rescued and frozen ones
       # included. This watches only this thread and keeps the frames in a local
-      # table. Returns [error, frames] for an error that escapes the block.
+      # table, weakly, so rescued exceptions can still be collected. Returns
+      # [error, frames] for an error that escapes the block.
       def self.capture_frames
-        frames = {}.compare_by_identity
+        frames = ObjectSpace::WeakMap.new
         hook = TracePoint.new(:raise) do |tp|
           # C frames have a nil path on Ruby 4.0
           frames[tp.raised_exception] = DEBUGGER__.capture_frames(nil).reject { |f| f.path&.match?(HIDDEN_FRAMES) }
         end
 
         hook.enable(target_thread: Thread.current) { yield }
-        nil
       rescue Exception => error
         frames.key?(error) ? [error, frames[error]] : raise
       end
@@ -121,9 +122,12 @@ module RSpec
 
           # debug reads the frames from this ivar. Set it on a copy so the
           # user's error stays as raised (it may be frozen, or get marshaled).
-          copy = error.dup
-          copy.instance_variable_set(:@__debugger_postmortem_frames, frames)
-          DebugIt.session { DEBUGGER__::SESSION.enter_postmortem_session(copy) }
+          # (A copy that can't be made just skips the session.)
+          copy = (error.dup rescue nil)
+          if copy
+            copy.instance_variable_set(:@__debugger_postmortem_frames, frames)
+            DebugIt.session { DEBUGGER__::SESSION.enter_postmortem_session(copy) }
+          end
           raise error
         end
       end

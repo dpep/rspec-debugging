@@ -305,6 +305,7 @@ describe RSpec::Debugging::DebugIt do
       expect(paths).to include(__FILE__)
       expect(paths.grep(%r{/rspec-(core|expectations|mocks|support)\b})).to be_empty
       expect(paths.grep(/\A#{File.expand_path("../lib", __dir__)}\//)).to be_empty
+      expect(paths).not_to include("<internal:trace_point>")
     end
 
     it "shows user code under lib/rspec/" do
@@ -358,6 +359,30 @@ describe RSpec::Debugging::DebugIt do
       expect(status(passed)).to eq(:passed)
       expect(failed.exception).to equal(frozen)
       expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session).once
+    end
+
+    it "reports the failure when it can't be copied" do
+      uncopyable = Class.new(StandardError) do
+        def initialize_copy(_) = raise(ArgumentError, "no copies")
+      end
+
+      example, = run_group { dit("x") { raise uncopyable, "boom" } }
+
+      expect(example.exception).to be_a(uncopyable)
+    end
+
+    it "doesn't keep rescued exceptions alive" do
+      rescued = Class.new(StandardError)
+
+      example, = run_group do
+        dit("x") do
+          1_000.times { raise rescued rescue nil }
+          GC.start
+          raise "#{ObjectSpace.each_object(rescued).count} still alive" if ObjectSpace.each_object(rescued).count > 100
+        end
+      end
+
+      expect(status(example)).to eq(:passed)
     end
   end
 
