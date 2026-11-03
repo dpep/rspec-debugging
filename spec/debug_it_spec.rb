@@ -124,6 +124,25 @@ describe RSpec::Debugging::DebugIt do
       expect(example.exception.message).to eq("boom")
     end
 
+    it "lists the initialized lets by name" do
+      run_group do
+        let(:user) { "secret" }
+        let(:account) { "secret" }
+        let(:unused) { "secret" }
+        dit("x") { user; account; raise "boom" }
+      end
+
+      expect($stderr.string).to include("initialized lets: user, account")
+      expect($stderr.string).not_to include("unused")
+      expect($stderr.string).not_to include("secret")
+    end
+
+    it "omits the lets line when none are initialized" do
+      run_group { dit("x") { raise "boom" } }
+
+      expect($stderr.string).not_to include("initialized lets")
+    end
+
     it "passes the example to the block" do
       example, = run_group { dit("x") { |ex| raise "no example" unless ex.is_a?(RSpec::Core::Example) } }
 

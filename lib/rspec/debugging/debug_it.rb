@@ -67,6 +67,10 @@ module RSpec
 
           MSG
 
+          # names only: values can be huge
+          lets = let_variables.select { |name| let_variable_initialized?(name) }
+          $stderr.puts "initialized lets: #{lets.join(", ")}\n\n" if lets.any?
+
           DebugIt.session { DEBUGGER__::SESSION.enter_postmortem_session(error) }
           raise error
         end
