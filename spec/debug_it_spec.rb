@@ -1,76 +1,73 @@
-RUN_COUNT = 0
+require "rspec/core/sandbox"
 
-describe RSpec::Debugging do
-  describe RSpec::Debugging::DebugIt do
-    let(:a) { "a" }
+describe RSpec::Debugging::DebugIt do
+  # Defines and runs a throwaway example group, isolated from this suite, and
+  # returns its examples. Its examples don't use rspec-mocks, so our stubs here
+  # stay intact.
+  def run_group(&block)
+    RSpec::Core::Sandbox.sandboxed do |config|
+      config.mock_with :nothing
+      config.include RSpec::Debugging::LetVariables
 
-    # dit
+      group = RSpec.describe("sandbox", &block)
+      group.run
+      group.descendants.flat_map(&:examples)
+    end
+  end
 
-    # dit "it explodes and debugs" do
-    #   expect(a).to eq("az")
-    # end
+  def status(example)
+    example.execution_result.status
+  end
 
-    # dcontext "when debugging" do
-    #   it "explodes and debugs" do
-    #     expect(a).to eq("az")
-    #   end
-    # end
+  before do
+    allow(DEBUGGER__::SESSION).to receive(:enter_postmortem_session)
+  end
 
-    context do
-      before do
-        expect_any_instance_of(Object).to receive(:debugger)
-      end
+  around do |example|
+    stderr = $stderr
+    $stderr = StringIO.new
+    example.run
+  ensure
+    $stderr = stderr
+  end
 
-      around do |ex|
-        stderr = $stderr
-        $stderr = StringIO.new
+  describe "blockless dit" do
+    it "opens the debugger" do
+      expect_any_instance_of(Object).to receive(:debugger)
 
-        ex.run
+      run_group { dit }
 
-        raise $stderr.string unless $stderr.string.include?("debugging")
-      ensure
-        $stderr = stderr
-      end
+      expect($stderr.string).to include("debugging: ")
+    end
+  end
 
-      dit
+  describe "dit with a block" do
+    it "opens the postmortem on a failed expectation, and still fails" do
+      example, = run_group { dit("x") { expect("a").to eq("az") } }
+
+      expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session)
+      expect($stderr.string).to include("Error:\n\nexpected: \"az\"")
+      expect(status(example)).to eq(:failed)
     end
 
-    context do
-      around do |ex|
-        stderr = $stderr
-        $stderr = StringIO.new
+    it "opens the postmortem on a raised error" do
+      example, = run_group { dit("x") { raise "boom" } }
 
-        ex.run
-
-        raise $stderr.string unless $stderr.string.include?("Error:\n\nexpected:")
-
-        if ex.exception.is_a?(RSpec::Expectations::ExpectationNotMetError)
-          ex.example.instance_variable_set(:@exception, nil)
-        end
-      ensure
-        $stderr = stderr
-      end
-
-      dit "it fails and debugs" do
-        expect(DEBUGGER__::SESSION).to receive(:enter_postmortem_session)
-        expect(a).to eq("az")
-      end
+      expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session)
+      expect(example.exception.message).to eq("boom")
     end
 
-    context do
-      let(:error) { RuntimeError.new("debugging") }
+    it "passes the example to the block" do
+      example, = run_group { dit("x") { |ex| raise "no example" unless ex.is_a?(RSpec::Core::Example) } }
 
-      after do |ex|
-        if ex.display_exception == error
-          ex.display_exception = nil
-        end
-      end
+      expect(status(example)).to eq(:passed)
+    end
 
-      dit "it explodes and debugs" do
-        expect(DEBUGGER__::SESSION).to receive(:enter_postmortem_session)
+    it "stays out of the way when the example passes" do
+      example, = run_group { dit("x") { expect(1).to eq(1) } }
 
-        raise error
-      end
+      expect(DEBUGGER__::SESSION).not_to have_received(:enter_postmortem_session)
+      expect(status(example)).to eq(:passed)
     end
   end
 end

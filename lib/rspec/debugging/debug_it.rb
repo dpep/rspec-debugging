@@ -12,9 +12,9 @@ module RSpec
         if example_block
           orig_example_block = example_block
 
-          example_block = Proc.new do
+          example_block = Proc.new do |*args|
             e = DEBUGGER__::SESSION.capture_exception_frames /(exe|bin|lib)\/rspec/ do
-              instance_exec(&orig_example_block)
+              instance_exec(*args, &orig_example_block)
             end
 
             if e
