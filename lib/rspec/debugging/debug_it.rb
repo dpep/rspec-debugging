@@ -8,13 +8,28 @@ module RSpec
 
       # Frames to hide from the postmortem: rspec's gems and executable, and this
       # gem. Anchored to those dirs so user code under lib/rspec/ stays visible.
-      # Regexps only: debug calls start_with? on a String one, and C frames on
-      # Ruby 4.0 have a nil path.
-      HIDDEN_FRAMES = [
+      HIDDEN_FRAMES = Regexp.union(
         %r{/rspec-(core|expectations|mocks|support)(-[^/]+)?/lib/},
         %r{/(exe|bin)/rspec\z},
         %r{\A#{Regexp.escape(File.expand_path("../..", __dir__))}/},
-      ].freeze
+      )
+
+      # Mirrors debug's SESSION.capture_exception_frames, which tags every
+      # exception raised on any thread while it runs, rescued and frozen ones
+      # included. This watches only this thread and keeps the frames in a local
+      # table. Returns [error, frames] for an error that escapes the block.
+      def self.capture_frames
+        frames = {}.compare_by_identity
+        hook = TracePoint.new(:raise) do |tp|
+          # C frames have a nil path on Ruby 4.0
+          frames[tp.raised_exception] = DEBUGGER__.capture_frames(nil).reject { |f| f.path&.match?(HIDDEN_FRAMES) }
+        end
+
+        hook.enable(target_thread: Thread.current) { yield }
+        nil
+      rescue Exception => error
+        frames.key?(error) ? [error, frames[error]] : raise
+      end
 
       # Skip, an expected failure of a pending example, and exit aren't failures.
       # Nor is anything once the run is stopping.
@@ -88,7 +103,7 @@ module RSpec
           example = RSpec.current_example
           return super unless example && args.first.equal?(example)
 
-          error = DEBUGGER__::SESSION.capture_exception_frames(*HIDDEN_FRAMES) { return super }
+          error, frames = DebugIt.capture_frames { return super }
           raise error unless DebugIt.failure?(error)
 
           $stderr.puts <<~MSG
@@ -102,7 +117,11 @@ module RSpec
           lets = let_variables.select { |name| let_variable_initialized?(name) }
           $stderr.puts "initialized lets: #{lets.join(", ")}\n\n" if lets.any?
 
-          DebugIt.session { DEBUGGER__::SESSION.enter_postmortem_session(error) }
+          # debug reads the frames from this ivar. Set it on a copy so the
+          # user's error stays as raised (it may be frozen, or get marshaled).
+          copy = error.dup
+          copy.instance_variable_set(:@__debugger_postmortem_frames, frames)
+          DebugIt.session { DEBUGGER__::SESSION.enter_postmortem_session(copy) }
           raise error
         end
       end

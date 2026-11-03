@@ -320,6 +320,41 @@ describe RSpec::Debugging::DebugIt do
     end
   end
 
+  describe "the user's exceptions" do
+    it "leaves rescued exceptions untouched, so they still marshal" do
+      example, = run_group do
+        dit("x") do
+          error = (raise "rescued" rescue $!)
+          raise "touched: #{error.instance_variables}" unless error.instance_variables.empty?
+          Marshal.dump(error)
+        end
+      end
+
+      expect(status(example)).to eq(:passed)
+    end
+
+    it "leaves the failure untouched, so it still marshals" do
+      example, = run_group { dit("x") { raise "boom" } }
+
+      expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session)
+      expect(example.exception.instance_variables).to be_empty
+      expect { Marshal.dump(example.exception) }.not_to raise_error
+    end
+
+    it "copes with frozen exceptions" do
+      frozen = RuntimeError.new("frozen boom").freeze
+
+      passed, failed = run_group do
+        dit("rescued") { expect { raise frozen }.to raise_error(frozen) }
+        dit("failure") { raise frozen }
+      end
+
+      expect(status(passed)).to eq(:passed)
+      expect(failed.exception).to equal(frozen)
+      expect(DEBUGGER__::SESSION).to have_received(:enter_postmortem_session).once
+    end
+  end
+
   it "reports the location where dit was written" do
     example, = run_group { dit("x") {} }
 
