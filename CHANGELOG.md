@@ -22,6 +22,9 @@
 - fix: `dit` no longer opens the debugger when stderr isn't a TTY (e.g. `rspec --bisect` children, which showed a bare debugger prompt)
 - fix: `--dry-run` reports a blockless `dit` as pending, not passed
 - fix: let helpers no longer treat a described class whose name contains `LetDefinitions` as a source of let variables
+- fix: `dit` no longer opens the debugger when stdout is redirected (e.g. `rspec -f json > out.json`), which looked like a hang and corrupted the output
+- fix: the postmortem no longer hides your own code under `lib/rspec/` or in a project checked out under `lib/rspec-*/`
+- fix: a blockless `dit` under `xdescribe`, a skipped group, or `pending` (on the group or itself) stays pending instead of becoming a breakpoint
 
 ###  0.0.4  (2025-02-08)
 - dependency fix
