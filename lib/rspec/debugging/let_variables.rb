@@ -6,25 +6,25 @@ module RSpec
       end
 
       def let_variable_initialized?(name)
-        __memoized.instance_variable_get("@memoized").key?(name)
+        __memoized.instance_variable_get("@memoized").key?(Internal.resolve(self, name))
       end
 
       def let_variable_get(name)
-        __memoized.instance_variable_get("@memoized")[name]
+        __memoized.instance_variable_get("@memoized")[Internal.resolve(self, name)]
       end
 
       def let_variable_reset(name)
-        __memoized.instance_variable_get("@memoized").delete(name)
+        __memoized.instance_variable_get("@memoized").delete(Internal.resolve(self, name))
       end
 
       def let_variable_locations(name)
-        Internal.definitions(self)[name].map do |fn|
+        Internal.definitions(self)[Internal.resolve(self, name)].map do |fn|
           Internal.location(fn)
         end
       end
 
       def let_variable_values(name)
-        Internal.definitions(self)[name].map do |fn|
+        Internal.definitions(self)[Internal.resolve(self, name)].map do |fn|
           { Internal.location(fn) => fn.bind(self).call }
         end
       end
@@ -43,6 +43,15 @@ module RSpec
               (defs[name] ||= []) << mod.instance_method(name)
             end
           end
+        end
+
+        def resolve(example, name)
+          name = name.to_sym
+          # a named subject is an alias of its let
+          name = example.class.instance_method(:subject).original_name if name == :subject
+          return name if definitions(example).key?(name)
+
+          raise ArgumentError, "no let variable named #{name.inspect}"
         end
 
         def location(fn)

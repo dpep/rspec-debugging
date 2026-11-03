@@ -61,6 +61,34 @@ describe RSpec::Debugging do
       end
     end
 
+    describe "names" do
+      it "accepts strings" do
+        expect(let_variable_initialized?("a")).to be true
+        expect(let_variable_get("a")).to eq "a"
+        expect(let_variable_locations("a").count).to be 1
+        expect(let_variable_values("a")).to eq(let_variable_values(:a))
+      end
+
+      it "raises on an unknown name" do
+        %i[let_variable_initialized? let_variable_get let_variable_reset let_variable_locations let_variable_values].each do |helper|
+          expect { send(helper, :nope) }.to raise_error(ArgumentError, /nope/)
+        end
+      end
+
+      context "with a named subject" do
+        subject(:thing) { "thing" }
+
+        it "treats subject as the named let" do
+          expect(let_variable_values(:subject)).to eq(let_variable_values(:thing))
+          expect(let_variable_initialized?(:subject)).to be false
+
+          subject
+
+          expect(let_variable_get(:subject)).to eq "thing"
+        end
+      end
+    end
+
     describe "let_variable_initialized?" do
       it "tracks whether a let variable has been initialized" do
         expect(let_variable_initialized?(:c)).to be false
