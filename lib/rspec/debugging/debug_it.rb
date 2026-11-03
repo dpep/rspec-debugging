@@ -42,7 +42,7 @@ module RSpec
         interactive = [$stdin, $stdout, $stderr].all?(&:tty?) && !RSpec.configuration.dry_run?
 
         if (ENABLED || metadata[:debug]) && interactive
-          debug_blockless if metadata[:dit] && metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED
+          debug_blockless if breakpoint?
           example_group_instance.extend(Postmortem)
         end
 
@@ -50,6 +50,15 @@ module RSpec
       end
 
       private
+
+      # A blockless dit, not otherwise skipped or pending. Its "Not yet
+      # implemented" skip overrides one inherited from the group, so ask the group.
+      def breakpoint?
+        metadata[:dit] &&
+          metadata[:skip] == RSpec::Core::Pending::NOT_YET_IMPLEMENTED &&
+          !metadata[:pending] &&
+          !example_group.metadata[:skip]
+      end
 
       # A blockless dit opens the debugger instead of being "Not yet implemented".
       def debug_blockless

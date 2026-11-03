@@ -110,6 +110,19 @@ describe RSpec::Debugging::DebugIt do
       expect(status(example)).to eq(:pending)
     end
 
+    it "stays pending when it or its group is marked skip or pending" do
+      expect_any_instance_of(Object).not_to receive(:debugger)
+
+      examples = run_group do
+        xdescribe("x") { dit }
+        describe("skip", skip: "wip") { dit }
+        describe("pending", pending: "later") { dit }
+        dit("pending", pending: "later")
+      end
+
+      expect(examples.map { |ex| status(ex) }).to all(eq(:pending))
+    end
+
     it "opens the debugger" do
       expect_any_instance_of(Object).to receive(:debugger)
 
