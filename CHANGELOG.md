@@ -1,3 +1,6 @@
+## Unreleased
+- Requires Ruby 3.3 or newer.
+
 ###  0.0.6  (2026-11-03)
 - fix: an example that closes `$stdin` and then fails skips the postmortem debugger instead of crashing its thread with `IOError: closed stream`
 

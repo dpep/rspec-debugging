@@ -22,10 +22,9 @@ module RSpec
       # included. This watches only this thread and keeps the frames in a local
       # table, keyed weakly so rescued exceptions can still be collected (not
       # WeakMap: it holds values weakly too, so a GC would drop the frames).
-      # Ruby 3.2 lacks WeakKeyMap. Returns [error, frames] for an error that
-      # escapes the block.
+      # Returns [error, frames] for an error that escapes the block.
       def self.capture_frames
-        frames = defined?(ObjectSpace::WeakKeyMap) ? ObjectSpace::WeakKeyMap.new : {}.compare_by_identity
+        frames = ObjectSpace::WeakKeyMap.new
         hook = TracePoint.new(:raise) do |tp|
           # C frames have a nil path on Ruby 4.0
           frames[tp.raised_exception] = DEBUGGER__.capture_frames(nil).reject { |f| f.path&.match?(HIDDEN_FRAMES) }
